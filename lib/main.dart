@@ -7,13 +7,11 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
-        // is not restarted.
         primarySwatch: Colors.blue,
       ),
       home: Home(),
@@ -31,6 +29,7 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   List _threads = [];
   var _listCap = 20;
+  var _listViewController = ScrollController();
 
   Future<void> readJson() async {
     final String response = await rootBundle.loadString('assets/data.json');
@@ -38,17 +37,31 @@ class _HomeState extends State<Home> {
     setState(() {
       _threads = data;
     });
-
-    print(_threads.length);
-    print(_threads[0]['id']);
   }
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
 
+    _listViewController.addListener(() {
+      if (_listViewController.position.atEdge) {
+        if (_listViewController.position.pixels == 0) {
+        } else {
+          setState(() {
+            _listCap += 10;
+          });
+          // print("reach end " + _listCap.toString());
+        }
+      }
+    });
+
     readJson();
+  }
+
+  @override
+  void dispose() {
+    _listViewController.dispose();
+    super.dispose();
   }
 
   @override
@@ -60,6 +73,7 @@ class _HomeState extends State<Home> {
       body: SafeArea(
           child: _threads.isNotEmpty
               ? ListView.builder(
+                  controller: _listViewController,
                   itemCount: _listCap,
                   itemBuilder: (context, index) {
                     return Container(
@@ -72,7 +86,8 @@ class _HomeState extends State<Home> {
                           children: <Widget>[
                             Expanded(
                               child: CircleAvatar(
-                                backgroundColor: Colors.white,
+                                backgroundColor: Colors.grey[300],
+                                radius: 40,
                                 backgroundImage: NetworkImage(_threads[index]
                                         ['avatar'] ??
                                     "http://cdn.onlinewebfonts.com/svg/img_364496.png"),
@@ -95,16 +110,27 @@ class _HomeState extends State<Home> {
                             ),
                             Expanded(
                               child: Column(
+                                mainAxisAlignment: MainAxisAlignment.start,
                                 children: [
                                   Container(
+                                    height: 30,
+                                    margin: EdgeInsets.only(bottom: 5),
                                     child: Text(_threads[index]
                                             ['last_seen_time'] ??
                                         "none"),
                                   ),
                                   Container(
-                                    child: Text(_threads[index]['messages']
-                                            .toString() ??
-                                        "0"),
+                                    child: _threads[index]['messages'] != null
+                                        ? CircleAvatar(
+                                            radius: 12,
+                                            backgroundColor: Colors.blue,
+                                            foregroundColor: Colors.white,
+                                            child: Text((_threads[index]
+                                                        ['messages'] ??
+                                                    "")
+                                                .toString()),
+                                          )
+                                        : Container(),
                                   )
                                 ],
                               ),
