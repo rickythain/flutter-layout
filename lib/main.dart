@@ -60,6 +60,8 @@ class _HomeState extends State<Home> {
 
   @override
   void dispose() {
+    // Clean up the controller when the widget is removed from the
+    // widget tree.
     _listViewController.dispose();
     super.dispose();
   }
@@ -86,11 +88,22 @@ class _HomeState extends State<Home> {
                           children: <Widget>[
                             Expanded(
                               child: CircleAvatar(
-                                backgroundColor: Colors.grey[300],
-                                radius: 40,
-                                backgroundImage: NetworkImage(_threads[index]
-                                        ['avatar'] ??
-                                    "http://cdn.onlinewebfonts.com/svg/img_364496.png"),
+                                backgroundColor:
+                                    _threads[index]['messages'] != null
+                                        ? Colors.blue
+                                        : Colors.grey,
+                                radius: 45,
+                                child: CircleAvatar(
+                                  backgroundColor: Colors.white,
+                                  radius: 40,
+                                  child: CircleAvatar(
+                                    backgroundColor: Colors.grey[300],
+                                    radius: 35,
+                                    foregroundImage: NetworkImage(_threads[
+                                            index]['avatar'] ??
+                                        "http://cdn.onlinewebfonts.com/svg/img_364496.png"),
+                                  ),
+                                ),
                               ),
                               flex: 2,
                             ),
